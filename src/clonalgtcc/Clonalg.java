@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Random;
 
 /**
+ * Normalização, 20% melhores clones, permutação.
  * Classe Main, onde roda o Clonalg
  * Mutar Clones 
  * Ver o k-médias.
@@ -119,12 +120,12 @@ public class Clonalg {
      * @param ant anticorpo que deseja clonar.
      * @return retorna um clone de um anticorpo.
      */
-    public Anticorpo cloneProf(Anticorpo ant) {
+    public Anticorpo clone(Anticorpo ant) {
         // Gets
         Anticorpo clone = new Anticorpo();
         double afinidade = ant.getAfinidade();
-        double x = (r.nextFloat()*(ant.getX()+ant.getX()))/2;
-        double y = (r.nextFloat()*(ant.getY()+ant.getY()))/2;
+        double x = (r.nextGaussian()*(ant.getX())+ant.getX())/2;
+        double y = (r.nextGaussian()*(ant.getY())+ant.getY())/2;
         Antigeno antigeno = null;
         
         if(ant.getAntigeno() != null){
@@ -150,7 +151,7 @@ public class Clonalg {
      * @param anticorpo anticorpo que deseja clonar.
      * @return retorna um clone de um anticorpo.
      */
-    public Anticorpo clone(Anticorpo anticorpo) {
+    public Anticorpo cloneM(Anticorpo anticorpo) {
         // Gets
         Anticorpo clone = new Anticorpo();
         double afinidade = anticorpo.getAfinidade();
