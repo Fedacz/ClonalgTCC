@@ -16,8 +16,10 @@ import java.util.ArrayList;
 public class Matriz {
 //    ArrayList<ArrayList> matriz = new ArrayList<>();
 
-    ArrayList<Anticorpo> anticorpos;
-    ArrayList<Antigeno> antigenos;
+    private ArrayList<Anticorpo> anticorpos;
+    private ArrayList<Antigeno> antigenos;
+    private int[][] matriz;
+    
     DecimalFormat df = new DecimalFormat("#.##");
 
     public Matriz() {
@@ -28,25 +30,25 @@ public class Matriz {
         this.antigenos = antigenos;
     }
 
-    public void criaMatriz(boolean imprimir) {
-        int[][] matriz = new int[antigenos.size()][anticorpos.size()];
+    public int[][] criaMatriz(boolean imprimir) {
+        setMatriz(new int[getAntigenos().size()][getAnticorpos().size()]);
         int linha = 0; // linha
-        for (Antigeno antigeno : antigenos) {
+        for (Antigeno antigeno : getAntigenos()) {
             double melhorDist = 1;
-            Anticorpo melhorAnticorpo;
+//            Anticorpo melhorAnticorpo;
             int cont = 0;
             int coluna = 0;
-            for (Anticorpo anticorpo : anticorpos) {
+            for (Anticorpo anticorpo : getAnticorpos()) {
                 // calcular a distância de todos anticorpos em relação ao antigeno, e marcar o mais próximo
                 double dist = Math.sqrt(Math.pow(antigeno.getX() - anticorpo.getX(), 2) + Math.pow(antigeno.getY() - anticorpo.getY(), 2)); // distância euclidiana
                 if (dist < melhorDist) {
                     melhorDist = dist;
-                    melhorAnticorpo = anticorpo;
+//                    melhorAnticorpo = anticorpo;
                     coluna = cont;
                 }
                 cont++;
             }
-            matriz[linha][coluna] = 1;
+            getMatriz()[linha][coluna] = 1;
             coluna = 0;
             linha++;
         }
@@ -55,24 +57,24 @@ public class Matriz {
             //Imprime matriz
             System.out.println("Matriz (Antigenos/Anticorpos): ");
             System.out.print("\n\t");
-            for (Anticorpo anticorpo : anticorpos) {
+            for (Anticorpo anticorpo : getAnticorpos()) {
                 System.out.print("\tX:" + df.format(anticorpo.getX()) + " ");
             }
             System.out.print("\n\t");
-            for (Anticorpo anticorpo : anticorpos) {
+            for (Anticorpo anticorpo : getAnticorpos()) {
                 System.out.print("\tY:" + df.format(anticorpo.getY()) + " ");
             }
             System.out.println("");
             ArrayList<Integer> somas = new ArrayList<>();
-            for (int i = 0; i < anticorpos.size(); i++) {
+            for (int i = 0; i < getAnticorpos().size(); i++) {
                 somas.add(0);
             }
             // Imprime dados
-            for (int i = 0; i < antigenos.size(); i++) {
-                System.out.print("X:" + df.format(antigenos.get(i).getX()) + "\tY:" + df.format(antigenos.get(i).getY()) + "\t ");
-                for (int j = 0; j < anticorpos.size(); j++) {
-                    System.out.print(matriz[i][j] + "\t");
-                    if (matriz[i][j] == 1) {
+            for (int i = 0; i < getAntigenos().size(); i++) {
+                System.out.print("X:" + df.format(getAntigenos().get(i).getX()) + "\tY:" + df.format(getAntigenos().get(i).getY()) + "\t ");
+                for (int j = 0; j < getAnticorpos().size(); j++) {
+                    System.out.print(getMatriz()[i][j] + "\t");
+                    if (getMatriz()[i][j] == 1) {
                         somas.set(j, somas.get(j) + 1);
                     }
                 }
@@ -86,6 +88,49 @@ public class Matriz {
             }
             System.out.println("");
         }
+        return getMatriz();
+    }
+
+    /**
+     * @return the anticorpos
+     */
+    public ArrayList<Anticorpo> getAnticorpos() {
+        return anticorpos;
+    }
+
+    /**
+     * @param anticorpos the anticorpos to set
+     */
+    public void setAnticorpos(ArrayList<Anticorpo> anticorpos) {
+        this.anticorpos = anticorpos;
+    }
+
+    /**
+     * @return the antigenos
+     */
+    public ArrayList<Antigeno> getAntigenos() {
+        return antigenos;
+    }
+
+    /**
+     * @param antigenos the antigenos to set
+     */
+    public void setAntigenos(ArrayList<Antigeno> antigenos) {
+        this.antigenos = antigenos;
+    }
+
+    /**
+     * @return the matriz
+     */
+    public int[][] getMatriz() {
+        return matriz;
+    }
+
+    /**
+     * @param matriz the matriz to set
+     */
+    public void setMatriz(int[][] matriz) {
+        this.matriz = matriz;
     }
 
 }
