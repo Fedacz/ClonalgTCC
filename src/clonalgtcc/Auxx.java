@@ -5,6 +5,11 @@
  */
 package clonalgtcc;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.function.Consumer;
+
 /**
  *
  * @author joao
@@ -52,4 +57,36 @@ public class Auxx {
     public void setDist(double dist) {
         this.dist = dist;
     }
+    
+    public static void main(String[] args) {
+//        Random r = new Random();
+//        DecimalFormat df = new DecimalFormat("#.####");
+//        ArrayList<Integer> nums = new ArrayList<>();
+//        ArrayList<Integer> nums2 = new ArrayList<>();
+//        for(int i =0;i<10;i++){
+//            for(int j=0;j<15;j++){
+//                System.out.print(df.format(r.nextFloat()) + " ");
+//            }
+//            System.out.println("");
+//        }
+    ArrayList<Integer> l1 = new ArrayList<>();
+    ArrayList<Integer> l2 = new ArrayList<>();
+
+    l1.add(1);
+    l1.add(2);
+    l1.add(3);
+    l2.addAll(l1);
+    
+    l2.remove(0);
+    
+        for (Integer integer : l1) {
+            System.out.println(integer);
+        }
+        System.out.println("");
+        for (Integer integer : l2) {
+            System.out.println(integer);
+        }
+        
+    }
+
 }

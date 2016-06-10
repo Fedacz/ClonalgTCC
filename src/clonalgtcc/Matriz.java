@@ -19,7 +19,7 @@ public class Matriz {
     private ArrayList<Anticorpo> anticorpos;
     private ArrayList<Antigeno> antigenos;
     private int[][] matriz;
-    
+
     DecimalFormat df = new DecimalFormat("#.##");
 
     public Matriz() {
@@ -40,9 +40,16 @@ public class Matriz {
             int coluna = 0;
             for (Anticorpo anticorpo : getAnticorpos()) {
                 // calcular a distância de todos anticorpos em relação ao antigeno, e marcar o mais próximo
-                double dist = Math.sqrt(Math.pow(antigeno.getX() - anticorpo.getX(), 2) + Math.pow(antigeno.getY() - anticorpo.getY(), 2)); // distância euclidiana
-                if (dist < melhorDist) {
-                    melhorDist = dist;
+                double soma = 0;
+                for (int v = 0; v < anticorpo.getVars().size(); v++) {
+                    // distância eucliadina
+                    soma += Math.pow(antigeno.getVars().get(v) - anticorpo.getVars().get(v), 2);
+                }
+                double distEuclidiana = Math.sqrt(soma);
+
+//                double distEuclidiana = Math.sqrt(Math.pow(antigeno.getX() - anticorpo.getX(), 2) + Math.pow(antigeno.getY() - anticorpo.getY(), 2)); // distância euclidiana
+                if (distEuclidiana < melhorDist) {
+                    melhorDist = distEuclidiana;
 //                    melhorAnticorpo = anticorpo;
                     coluna = cont;
                 }
@@ -57,21 +64,32 @@ public class Matriz {
             //Imprime matriz
             System.out.println("Matriz (Antigenos/Anticorpos): ");
             System.out.print("\n\t");
-            for (Anticorpo anticorpo : getAnticorpos()) {
-                System.out.print("\tX:" + df.format(anticorpo.getX()) + " ");
-            }
-            System.out.print("\n\t");
-            for (Anticorpo anticorpo : getAnticorpos()) {
-                System.out.print("\tY:" + df.format(anticorpo.getY()) + " ");
+            for (int v = 0; v < antigenos.get(0).getVars().size(); v++) {
+                for (Anticorpo anticorpo : getAnticorpos()) {
+                    System.out.print("\tX:" + df.format(anticorpo.getVars().get(v)) + " ");
+                }
+                System.out.print("\n\t");
             }
             System.out.println("");
+//            for (Anticorpo anticorpo : getAnticorpos()) {
+//                System.out.print("\tX:" + df.format(anticorpo.getX()) + " ");
+//            }
+//            System.out.print("\n\t");
+//            for (Anticorpo anticorpo : getAnticorpos()) {
+//                System.out.print("\tY:" + df.format(anticorpo.getY()) + " ");
+//            }
+//            System.out.println("");
             ArrayList<Integer> somas = new ArrayList<>();
             for (int i = 0; i < getAnticorpos().size(); i++) {
                 somas.add(0);
             }
             // Imprime dados
             for (int i = 0; i < getAntigenos().size(); i++) {
-                System.out.print("X:" + df.format(getAntigenos().get(i).getX()) + "\tY:" + df.format(getAntigenos().get(i).getY()) + "\t ");
+                for (int v = 0; v < antigenos.get(0).getVars().size(); v++) {
+                    System.out.print("Var"+v+": "+df.format(getAntigenos().get(i).getVars().get(v))+" \t");
+                }
+//                System.out.print("X:" + df.format(getAntigenos().get(i).getX()) + "\tY:" + df.format(getAntigenos().get(i).getY()) + "\t ");
+               
                 for (int j = 0; j < getAnticorpos().size(); j++) {
                     System.out.print(getMatriz()[i][j] + "\t");
                     if (getMatriz()[i][j] == 1) {

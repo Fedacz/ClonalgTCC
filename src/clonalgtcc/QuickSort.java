@@ -8,7 +8,7 @@ package clonalgtcc;
 import java.util.ArrayList;
 
 /**
- *
+ * Forma Crescente
  * @author joao
  */
 public class QuickSort {
@@ -47,5 +47,17 @@ public class QuickSort {
         vetor.set(f, pivo);
         return f;
     }
+//    public static void main(String[] args) {
+//        Anticorpo a = new Anticorpo(null, null, 5.0);
+//        Anticorpo a2 = new Anticorpo(null, null, 2.0);
+//        ArrayList<Anticorpo> ants = new ArrayList<>();
+//        ants.add(a);
+//        ants.add(a2);
+//        QuickSort q = new QuickSort();
+//        q.quickSort(ants);
+//        for (Anticorpo ant : ants) {
+//            System.out.println(ant.getAfinidade());
+//        }
+//    }
 
 }
