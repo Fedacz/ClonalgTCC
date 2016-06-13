@@ -34,8 +34,8 @@ public class Clonalg {
     private ArrayList<Antigeno> antigenos = leitor.leAntigenos();
 
     // Configurações.
-    private static final int tamPop = 50;
-    private static final double limiar = 0.1; // numero de anticorpos selecionados para serem clonados
+    private static final int tamPop = 1;
+    private static final double limiar = 0.2; // numero de anticorpos selecionados para serem clonados
     private static final int numClo = 5;//6 // cada selecionado possuirá este número de clones ou menos
     private static final double numSel = 0.2; // numero de clones selecionados para entra na população 20%.
     private static int numGeracoes = 200;
@@ -552,12 +552,13 @@ public class Clonalg {
                 // K-MÉDIAS ao final de cada geração.
                 if(i >= 3){
                     kMedias();
-////                    atualizaAfinidadePop(getPopulacao());   //*  
+//////                    atualizaAfinidadePop(getPopulacao());   //*  
                 }
                 } else {
                     gers = i+1;
                     i = numGeracoes; // finaliza o alg.
                 }
+                PlotTest plot = new PlotTest(popInicial, getAntigenos(), getPopulacao(), gers);
             }
             
             System.out.println("Geração: " + gers);
@@ -579,7 +580,7 @@ public class Clonalg {
 //        clo.grupos(clo.getPopulacao(),m);
           // Gerar gráfico com objetos e protótipos
         if(getAntigenos().get(0).getVars().size()==2){
-            PlotTest plot = new PlotTest(popInicial, getAntigenos(), getPopulacao());
+            PlotTest plot = new PlotTest(popInicial, getAntigenos(), getPopulacao(), it);
         }
 //            System.out.println(popInicial.toString());
             mediaPCC += matrizGrupos();
@@ -597,6 +598,7 @@ public class Clonalg {
         System.out.println("Média PCC: " + mediaPCC / execucoes.size());
         System.out.println("Média Protótipos: " + mediaPrototipos / execucoes.size());
         System.out.println("Media Gerações: " + mediaGeracoes / execucoes.size());
+//        System.out.println(mediaPCC / execucoes.size()+" "+ mediaPrototipos / execucoes.size()+" "+mediaGeracoes / execucoes.size());
 
     }
 

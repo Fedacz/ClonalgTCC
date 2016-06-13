@@ -37,7 +37,7 @@ public class PlotTest {
 //        ArrayList<Antigeno> antigenos = l.leAntigenos();
 //        new PlotTest(antigenos, anticrpos);
 //    }
-    public PlotTest (ArrayList<Anticorpo> iniciais, ArrayList<Antigeno> antigenos, ArrayList<Anticorpo> anticorpos) {
+    public PlotTest (ArrayList<Anticorpo> iniciais, ArrayList<Antigeno> antigenos, ArrayList<Anticorpo> anticorpos, int it) {
         dataset = new XYSeriesCollection();
         XYSeries data1 = new XYSeries("Antígenos");
 //        XYSeries data2 = new XYSeries("Class2");
@@ -62,13 +62,13 @@ public class PlotTest {
 //        dataset.addSeries(data4);
         dataset.addSeries(dataAnticorpos);
         
-        showGraph();
+        showGraph(String.valueOf(it));
     }
-    private void showGraph() {
+    private void showGraph(String it) {
         final JFreeChart chart = createChart(dataset);
         final ChartPanel chartPanel = new ChartPanel(chart);
 //        chartPanel.setPreferredSize(new java.awt.Dimension(500, 380)); //270
-        final ApplicationFrame frame = new ApplicationFrame("Dados");
+        final ApplicationFrame frame = new ApplicationFrame("Dados "+it);
         frame.setContentPane(chartPanel);
         frame.pack();
         frame.setVisible(true);
