@@ -79,13 +79,13 @@ public class Anticorpo {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-//        sb.append(String.format("X: %f Y: %f, Afinidade: %f", x,y,afinidade));
-//        if(antigeno != null){
-//            sb.append(String.format(" com X: %f Y: %f\n", antigeno.getX(),antigeno.getY()));
-//        }
+        sb.append(String.format("X: %f Y: %f, Afinidade: %f\n", getVars().get(0),getVars().get(1),afinidade));
+        if(antigeno != null){
+            sb.append(String.format("Geno: X: %f Y: %f\n", antigeno.getVars().get(0),antigeno.getVars().get(1)));
+        }
 //        sb.append(vars.toString());
-        sb.append(" Afinidade: ");
-        sb.append(afinidade);
+//        sb.append(", Afinidade: ");
+//        sb.append(afinidade);
         sb.append("\n");
         return sb.toString(); //To change body of generated methods, choose Tools | Templates.
     }

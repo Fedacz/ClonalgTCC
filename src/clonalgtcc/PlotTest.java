@@ -55,12 +55,13 @@ public class PlotTest {
         for(Anticorpo inicial : iniciais){
             dataInicial.add(inicial.getVars().get(0),inicial.getVars().get(1));
         }
-        dataset.addSeries(dataInicial);
         dataset.addSeries(data1);
 //        dataset.addSeries(data2);
 //        dataset.addSeries(data3);
 //        dataset.addSeries(data4);
         dataset.addSeries(dataAnticorpos);
+        dataset.addSeries(dataInicial);
+
         
         showGraph(String.valueOf(it));
     }

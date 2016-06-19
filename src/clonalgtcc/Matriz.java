@@ -34,7 +34,7 @@ public class Matriz {
         setMatriz(new int[getAntigenos().size()][getAnticorpos().size()]);
         int linha = 0; // linha
         for (Antigeno antigeno : getAntigenos()) {
-            double melhorDist = 1;
+            double melhorDist = Double.MAX_VALUE;
 //            Anticorpo melhorAnticorpo;
             int cont = 0;
             int coluna = 0;

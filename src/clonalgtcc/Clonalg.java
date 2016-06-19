@@ -11,11 +11,8 @@ import java.util.Random;
 // FAZER MATRIZ DE PERTINENCIA E TESTAR BASES MAIORES
 
 /**
- * ARRUMAR NORMALIZAÇÃO DE DISTÂNCIAS DA AFINIDADE.
- * Arrumar o erro. Normalização das distâncias, classificação. Mexi no nClones.
- * Normalização, 20% melhores clones, permutação. Classe Main, onde roda o
- * Clonalg Mutar Clones Ver o k-médias. Erro Quadrático (o algoritmo deve parar
- * quando o valor dessa função for menor q 10^-3.
+ * ARRUMAR NORMALIZAÇÃO DE DISTÂNCIAS DA AFINIDADE. Fazer com que clones
+ * melhores substituam PAIS
  *
  * @author joao
  */
@@ -34,13 +31,14 @@ public class Clonalg {
     private ArrayList<Antigeno> antigenos = leitor.leAntigenos();
 
     // Configurações.
-    private static final int tamPop = 1;
-    private static final double limiar = 0.2; // numero de anticorpos selecionados para serem clonados
+    private static final int tamPop = 100;
+    private static final double limiar = 0.5; // numero de anticorpos selecionados para serem clonados
     private static final int numClo = 5;//6 // cada selecionado possuirá este número de clones ou menos
     private static final double numSel = 0.2; // numero de clones selecionados para entra na população 20%.
     private static int numGeracoes = 200;
     private static final double erroQuadratico = 0.01;
     private static final int tamanhoBase = 2;
+    private static boolean graficosG = false;
 
     /**
      * Gera uma população de anticorpos aleatrios no intervalo (0,1].
@@ -63,8 +61,8 @@ public class Clonalg {
         }
     }
 
-        public ArrayList<Anticorpo> geraPop(int tamPop) {
-            ArrayList<Anticorpo> iniciais = new ArrayList<>(); 
+    public ArrayList<Anticorpo> geraPop(int tamPop) {
+        ArrayList<Anticorpo> iniciais = new ArrayList<>();
         for (int i = 0; i < tamPop; i++) {
             Anticorpo ant = new Anticorpo(tamanhoBase);
 
@@ -80,12 +78,12 @@ public class Clonalg {
         }
         return iniciais;
     }
-        
+
     // ARRAY LIST COM 10 ANTICORPOS INICIAS
     public ArrayList<Anticorpo> geraPopC() {
         ArrayList<String> linhas = new ArrayList<>();
         ArrayList<Anticorpo> anticorpos = new ArrayList<>();
-        
+
         String nome = "iniciais2.txt"; //17 variaveis
         try {
             FileReader arq = new FileReader(nome);
@@ -114,6 +112,16 @@ public class Clonalg {
         return anticorpos;
     }
 
+    public double distanciaEuclidiana(Anticorpo anticorpo, Antigeno antigeno) {
+        double soma = 0;
+
+        for (int v = 0; v < tamanhoBase; v++) {
+            soma += Math.pow((antigeno.getVars().get(v) - anticorpo.getVars().get(v)), 2);
+        }
+
+        return Math.sqrt(soma);
+    }
+
     /**
      * Para cada antigeno selecionado calcular o anticorpo de maior afinidade e
      * então setar sua afinidade e seu antigeno. Atualiza afinidade de um
@@ -125,71 +133,87 @@ public class Clonalg {
         ArrayList<Anticorpo> anticorpos = new ArrayList<>();
         anticorpos.addAll(anticorposs);
 //        ArrayList<Anticorpo> anticorpos = (ArrayList<Anticorpo>)anticorposs.clone();
-        
+
 //        double min = 0;
 //        double max = Math.sqrt(tamanhoBase);
-        double min = Double.MAX_VALUE;
-        double max = 0;
+//        double min = Double.MAX_VALUE;
+//        double max = 0;
         Collections.shuffle(getAntigenos()); //Fisher–Yates shuffle @https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
-        for (int i = 0; i < Math.min(anticorpos.size(), antigenos.size()); i++) {// for de antigenos
+//        for (int i = 0; i < Math.min(anticorposs.size(), antigenos.size()); i++) {// for de antigenos
+        for (int i = 0; i < antigenos.size(); i++) {// for de antigenos
 //            double somatorio = 0;
-            Auxx aux = new Auxx(Double.MAX_VALUE); // Guarda o anticorpo de menor distância, e a menor distância.
+            Auxx aux = new Auxx(Double.MIN_VALUE); // Guarda o anticorpo de menor distância, e a menor distância.
             aux.setAnticorpo(null); // inicializa um anticorpo para o aux
             for (Anticorpo anticorpo : anticorpos) { // Encontrar o anticorpo de maior afinidade
-                double soma = 0;
-                for (int v = 0; v < tamanhoBase; v++) {
-                    soma += Math.pow((antigenos.get(i).getVars().get(v) - anticorpo.getVars().get(v)), 2);
-                }
-                double dist = Math.sqrt(soma); // distância euclidiana
+                double dist =  1/distanciaEuclidiana(anticorpo, antigenos.get(i));
 //                somatorio = somatorio + dist;
 //                System.out.println("Distância: "+dist);
-                if (dist < aux.getDist()) { // atualiza quem tem maior afinidade
-                    aux.setDist(dist);
-                    aux.setAnticorpo(anticorpo);
+                //quanto maior afinidade melhor
+                if (dist > aux.getDist()) { // atualiza quem tem maior afinidade
+//                    if (dist > anticorpo.getAfinidade() && anticorpo.getAntigeno() != null) {
+//                        aux.setDist(dist);
+//                        aux.setAnticorpo(anticorpo);
+//                    }
+//                    if (anticorpo.getAntigeno() == null) {
+                        aux.setDist(dist);
+                        aux.setAnticorpo(anticorpo);
+//                    }
+
                 }
             }
-//            if(anticorposs.size()<10){
-                anticorpos.remove(aux.getAnticorpo());
+//            if(anticorposs.size()<=5){
+//                System.out.println("sim");
+            // Impede a competitividade
+//            anticorpos.remove(aux.getAnticorpo());
 //            }
+//            else{System.out.println("não");}
             // atualiza afinidade
 //            double afinidade = aux.getDist() / somatorio;
             double afinidade = 0;
 //            if (anticorpos.size() > 1) {
 //                afinidade = (aux.getDist() - min) / (max - min);
 //            } else {
-//                afinidade = (aux.getDist() - min) / (max - min);
+//                afinidade = 0.0;
 //            }
-            afinidade = aux.getDist();
+//            if (aux.getAnticorpo() != null) {
+                afinidade = aux.getDist();
+                aux.getAnticorpo().setAfinidade(afinidade);
+                aux.getAnticorpo().setAntigeno(antigenos.get(i));
+//            }
 //            System.out.println("Distância: "+aux.getDist()+" Soma: "+somatorio);
 //            System.out.println("Afinidade: "+afinidade);
 //            System.out.println("Somatorio: "+somatorio);
 //            System.out.println("Distância: "+aux.getDist());
 //            System.out.println("Afinidade: "+afinidade);
-            aux.getAnticorpo().setAfinidade(afinidade);
-            aux.getAnticorpo().setAntigeno(antigenos.get(i));
+
         }
         // Depois que calcula todas afinidades, normalizar todas as diferentes de -1
         //Pegando máximo e mínimo
+        double somatorio = 0;
+//        System.out.println("Afinidades não normalizadas: ");
         for (Anticorpo anticorpo : anticorposs) {
-            if(anticorpo.getAfinidade()<min && anticorpo.getAfinidade() != -1){
-                min = anticorpo.getAfinidade();
+            if (anticorpo.getAfinidade() != -1) {
+//                System.out.println("Afinidade: "+anticorpo.getAfinidade());
+                somatorio += anticorpo.getAfinidade();
             }
-            if(anticorpo.getAfinidade()>max){
-                max = anticorpo.getAfinidade();
-            }
+//            if (anticorpo.getAfinidade() < min && anticorpo.getAfinidade() != -1) {
+//                min = anticorpo.getAfinidade();
+//            }
+//            if (anticorpo.getAfinidade() > max) {
+//                max = anticorpo.getAfinidade();
+//            }
         }
 //        System.out.println("Afinidades Antigas: ");
 //        System.out.println(anticorposs.toString());
 //         Setanto afinidades normalizadas
         for (Anticorpo anticorpo : anticorposs) {
-            if(max==min){
-                anticorpo.setAfinidade(0);
-            } else
-            if(anticorpo.getAfinidade()==-1){
-                anticorpo.setAfinidade((anticorpo.getAfinidade()));
-            }
-            else{
-                anticorpo.setAfinidade((anticorpo.getAfinidade() - min)/(max-min));
+            if (anticorposs.size() == 1) {
+//                System.out.println("caiu: "+anticorpo.toString());
+                anticorpo.setAfinidade(1); // único entao 0
+            } else if (anticorpo.getAfinidade() == -1) {
+                anticorpo.setAfinidade((anticorpo.getAfinidade())); // -1 continua -1
+            } else {
+                anticorpo.setAfinidade((anticorpo.getAfinidade()) / (somatorio));
             }
         }
 //        System.out.println("Max: "+max+" Min: "+min);
@@ -210,7 +234,14 @@ public class Clonalg {
         ArrayList<Double> varsClone = (ArrayList<Double>) ant.getVars().clone();
         // Sets Vars
         for (int i = 0; i < tamanhoBase; i++) {
-            double x = Math.abs((r.nextGaussian() * (varsClone.get(i)) + varsClone.get(i)) / 2);
+            if (i == 0) {
+//                System.out.println(" X: "+varsClone.get(i));
+            }
+            double x = Math.abs((((1 - r.nextGaussian()) * varsClone.get(i)) + varsClone.get(i)) / 2);
+            if (i == 0) {
+//                System.out.println("Novo X: "+x);
+            }
+
 //            System.out.println("X"+i+": "+x);
             if (x > 1) {
                 varsClone.set(i, (double) 1);
@@ -239,10 +270,12 @@ public class Clonalg {
         // (anticorpo = anticorpo - alfa*(anticorpo-antigeno)), ponderada por uma taxa de mutação alfa.
         // alfa = (afinidade)
 //        System.out.println("X: "+anticorpo.getX()+ " Y: "+anticorpo.getY()+"Afinidade: "+anticorpo.getAfinidade()+ " Xgeno: "+anticorpo.getAntigeno().getX()+ " Ygeno: "+anticorpo.getAntigeno().getY());
+//        System.out.println("Anticorpo Antigo: "+anticorpo.toString());
         for (int i = 0; i < tamanhoBase; i++) {
 //            System.out.println("Anticorpo: "+anticorpo.toString());
-            anticorpo.getVars().set(i, anticorpo.getVars().get(i) - (anticorpo.getAfinidade() * (anticorpo.getVars().get(i) - anticorpo.getAntigeno().getVars().get(i))));
+            anticorpo.getVars().set(i, anticorpo.getVars().get(i) - ((anticorpo.getAfinidade()) * (anticorpo.getVars().get(i) - anticorpo.getAntigeno().getVars().get(i))));
         }
+//        System.out.println("Anticorpo Mutado: "+anticorpo.toString());
 //        anticorpo.setAfinidade(-1); // deixa afinidade como -1 para depois na atualização ver se será selecionado e atualizado.
 //        System.out.println("X: "+anticorpo.getX()+ " Y: "+anticorpo.getY()+"Anfinidade: "+anticorpo.getAfinidade()+ " Xgeno: "+anticorpo.getAntigeno().getX()+ " Ygeno: "+anticorpo.getAntigeno().getY());
     }
@@ -264,12 +297,14 @@ public class Clonalg {
      */
     public void kMedias() {
         // k-médias
+        if (getPopulacao().isEmpty()) {
+            System.out.println("POPULAÇÂO VAZIA!");
+        }
         Matriz matriz = new Matriz(getPopulacao(), getAntigenos());
         int m[][] = matriz.criaMatriz(false);
         // Pega uma coluna e percorre suas linhas
         for (int k = 0; k < getPopulacao().size(); k++) { //coluna (Anticorpos/Protótipos)
             int count = 0;
-            double x = 0, y = 0;
             ArrayList<Double> aux = new ArrayList<>();
             for (int i = 0; i < tamanhoBase; i++) {
                 aux.add((double) 0);
@@ -297,11 +332,12 @@ public class Clonalg {
     }
 
     public void mediasInt(double limite) {
+
         ArrayList<Anticorpo> anticorpos = new ArrayList<>();
         // Pegar um anticorpo aleatório e medir distâncias perto dele
         double min = 0;
         double max = Math.sqrt(tamanhoBase);
-        
+
         for (int i = 0; i < populacao.size(); i++) {
             Anticorpo sel = populacao.get(r.nextInt(populacao.size()));
 //            System.out.println("Selecionado: " + sel.toString());
@@ -417,7 +453,7 @@ public class Clonalg {
      *
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         //QuickSort quick = new QuickSort();
         // Gera população
         Clonalg clo = new Clonalg();
@@ -426,13 +462,67 @@ public class Clonalg {
 //        clo.geraPopC();
         // COMEÇA ITERAÇÕES
         clo.executa(iniciais);
-        
 
     }
 
+    /**
+     * Atualiza um ArrayList deixando somente os melhores.
+     *
+     * @param clones
+     */
+    public void selecionaMelhoresClones(ArrayList<Anticorpo> clones) {
+        ArrayList<Anticorpo> rejeitados = new ArrayList<>();
+        for (Anticorpo clone : clones) {
+            double dist = distanciaEuclidiana(clone, clone.getAntigeno());
+            clone.setAfinidade(dist);
+        }
+        quick.quickSort(clones); // Ordem crescete, melhores por primeiro
+        int reSel = (int) (clones.size() * numSel); // selecionando x% melhores
+        if (reSel < 1) {
+            reSel = 1;
+        }
+        for (int j = reSel; j < clones.size(); j++) {
+            rejeitados.add(clones.get(j));
+        }
+        clones.removeAll(rejeitados);
+    }
+
+    public void mediaMesmosGrupos() {
+        ArrayList<Anticorpo> novos = new ArrayList<>();
+        ArrayList<Anticorpo> remover = new ArrayList<>();
+        for (Antigeno antigeno : getAntigenos()) {
+            ArrayList<Anticorpo> mesmos = new ArrayList<>();
+
+            for (Anticorpo pop : populacao) {
+                if (pop.getAntigeno() == antigeno) {
+                    mesmos.add(pop);
+                }
+            }
+            if (mesmos.size() >= 2) {
+                ArrayList<Double> aux = new ArrayList<>();
+                for (int i = 0; i < tamanhoBase; i++) {
+                    aux.add(0.0);
+                }
+                for (Anticorpo mesmo : mesmos) {
+                    for (int i = 0; i < tamanhoBase; i++) {
+                        aux.set(i, aux.get(i) + mesmo.getVars().get(i));
+                    }
+                }
+                for (int i = 0; i < aux.size(); i++) {
+                    aux.set(i, aux.get(i) / mesmos.size());
+                }
+                Anticorpo a = new Anticorpo(aux, antigeno, 1); // PODE SER QUE TENHA QUE MUDAR O 1
+                novos.add(a);
+                remover.addAll(mesmos);
+            }
+        }
+        populacao.removeAll(remover);
+        populacao.addAll(novos);
+    }
+
     // VAI EXECUTAR O NUMERO DE VEZES DO TAMANHO DO ARRAY EXECUCOES
-    public void executa(ArrayList<Anticorpo> execucoes) {
-        geraPopC();
+    public void executa(ArrayList<Anticorpo> execucoes) throws InterruptedException {
+        //geraPopC();
         // COMEÇA ITERAÇÕES
         int it = 1;
         double mediaPCC = 0;
@@ -450,73 +540,47 @@ public class Clonalg {
 
             double objetivoAtual = 0;
             double objetivo = 0;
-            int gers =0;
-            
+            int gers = 0;
+            atualizaAfinidadePop(getPopulacao());
             // Laço do algoritmo, inicia as gerações
             for (int i = 0; i < numGeracoes; i++) {
-                
-                if (objetivo > erroQuadratico || i == 0 || getPopulacao().size()<2) {
-                    // Atualiza a afinidade da população
-                    atualizaAfinidadePop(getPopulacao());
-                    objetivo = objetivoAtual; // a objetivo é atualizada
-//                    System.out.println(i + 1 + "ª Geração");
 
+//                if (objetivo > erroQuadratico || i == 0 || getPopulacao().size()<2) {
+                if (objetivo > erroQuadratico || i == 0) {
+                    objetivo = objetivoAtual; // a objetivo é atualizada
+
+//                    System.out.println(i + 1 + "ª Geração");
+                    // 4) Seleciona candidatos a clones, conforme menor que o limiar. Clona de acordo com a afinidade.
                     // Selecionar anticorpos para clone 
                     ArrayList<Anticorpo> selecionados = new ArrayList<>();
                     // é selecionado os anticorpos que possuem afinidade < limiar
                     for (Anticorpo anticorpo : getPopulacao()) {
-                        if ((anticorpo.getAfinidade() < limiar || i == 0) && anticorpo.getAfinidade() != -1) { // limiar
-                            int nClones = (int) (numClo * (1 - anticorpo.getAfinidade())); // modificado 1- anti
-                            if(nClones<1){nClones=1;}
+                        if ((anticorpo.getAfinidade() > limiar || i == 0) && anticorpo.getAfinidade() != -1) { // limiar
+                            int nClones = (int) (numClo * (anticorpo.getAfinidade())); // modificado 1- anti
+                            if (nClones < 1) {
+                                nClones = 1;
+                            }
 //                            System.out.println("S: "+nClones);
-//                    System.out.println("Afinidade: "+anticorpo.getAfinidade() +"nClones: "+nClones);
+//                    System.out.println("CLONA. Afinidade: "+anticorpo.getAfinidade() +"nClones: "+nClones);
                             for (int k = 0; k < nClones; k++) { // insere k vezes o mesmo elemento na lista de clones
                                 selecionados.add(clone(anticorpo));
                             }
                         }
-//                        else{System.out.println("N");}
+//                        else{System.out.println("N "+anticorpo.getAfinidade());}
                     }
 
-                    // Muta clones. 
+                    // 5) Muta clones. (afinidades ficam desatualizadas). 
                     mutaClones(selecionados);
-                    // Insere os clones na população
-                    getPopulacao().addAll(selecionados); // adiciona todos clones
-                    
-                    // Setar todos anticorpos como se não tivessem antigenos
-                    // Comentar para ver rastros ***************************************************************************
-                    for (Anticorpo anticorpo : getPopulacao()) {
-                        anticorpo.setAntigeno(null);
-                        anticorpo.setAfinidade((double) -1);
+                    //MUDAR 1 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                    // 6) Comparar a distância euclidiana de cada clone com seu antígeno e ordenar os melhores.
+                    // 7) Re-selecionar somente os clones mais adaptados.
+                    // 8) Inserir os mais adaptados na população geral.
+                    selecionaMelhoresClones(selecionados);
+                    getPopulacao().addAll(selecionados);
+                    if (getPopulacao().size() > getAntigenos().size()) {
+//                        mediaMesmosGrupos(); // população toda
                     }
-//                System.out.println("Pop: "+clo.getPopulacao().toString());
-                    //Atualiza afinidade da população
-                    atualizaAfinidadePop(getPopulacao());
-                    
-                    // Re-seleciona clones mutados **********************************************
-//                    if(i>=5){
-                        //1º Passo
-                        ArrayList<Anticorpo> rejeitados = new ArrayList<>();
-                        for (Anticorpo selecionado : selecionados) {
-                            //remover os -1
-                            if(selecionado.getAfinidade()==-1){
-                                rejeitados.add(selecionado);
-                            }
-                        }
-                        selecionados.removeAll(rejeitados);
-                        rejeitados.removeAll(rejeitados);
-                        
-                        //2º Passo
-                        quick.quickSort(selecionados); // Ordem crescete, melhores por primeiro
-                        int reSel = (int)(selecionados.size()*numSel); // selecionando x% melhores
-                        if(reSel < 1){reSel=1;}
-//                        System.out.println("reSel: "+reSel);
-                        for (int j=reSel;j<selecionados.size();j++) {
-                            rejeitados.add(selecionados.get(j));
-                        }
-                        selecionados.removeAll(rejeitados);
-                        getPopulacao().removeAll(rejeitados);
-//                    }
-                    // Acaba re-seleção *********************************************************
+                    // MUDADO 1 
 
                     // Limpar população, eliminando quem não possui relação com nenhum objeto
                     ArrayList<Anticorpo> delets = new ArrayList<>();
@@ -526,11 +590,30 @@ public class Clonalg {
                         }
                     }
                     getPopulacao().removeAll(delets);
-
+//                    System.out.println("Tam Pop2: "+getPopulacao().size());
                     // Imprime a população no final da geração
 //            System.out.println("População no final da geração: ");
 //            System.out.println(clo.getPopulacao().toString());
+                    // 9) Calcular o erro quadrático.
                     // Calcula função objetivo (Erro Quadrático)
+                    kMedias();
+                    // Atualiza a afinidade da população (Reseta afinidades)
+                    for (Anticorpo anticorpo : getPopulacao()) {
+                        anticorpo.setAntigeno(null);
+                        anticorpo.setAfinidade((double) -1);
+                    }
+                    // 2) Atualiza afinidade da população, e normaliza a afinidade. (Competem entre Si).
+                    atualizaAfinidadePop(getPopulacao());
+                    // 3) Remove anticorpos da população que não identificam qualquer antígeno.
+                    ArrayList<Anticorpo> deletss = new ArrayList<>();
+//                    deletss.removeAll(deletss);
+                    for (Anticorpo anticorpo : getPopulacao()) {
+                        if (anticorpo.getAfinidade() == (double) -1 || anticorpo.getAntigeno() == null) {
+                            deletss.add(anticorpo);
+                        }
+                    }
+                    getPopulacao().removeAll(deletss);
+
                     objetivoAtual = 0;
                     for (Antigeno antigeno : getAntigenos()) {
                         for (Anticorpo anticorpo : getPopulacao()) {
@@ -548,40 +631,44 @@ public class Clonalg {
 //                    }
 //                    atualizaAfinidadePop(getPopulacao());   //*
 //                System.out.println("Objetivo: " + objetivo);
-                    gers = i+1;
-                // K-MÉDIAS ao final de cada geração.
-                if(i >= 3){
-                    kMedias();
+                    gers = i + 1;
+                    // K-MÉDIAS ao final de cada geração.
+//                if(i >= 2){
+                    //10) k-Médias na população geral.
+//                    kMedias();
 //////                    atualizaAfinidadePop(getPopulacao());   //*  
-                }
+//                }
                 } else {
-                    gers = i+1;
+                    gers = i + 1;
                     i = numGeracoes; // finaliza o alg.
                 }
-                PlotTest plot = new PlotTest(popInicial, getAntigenos(), getPopulacao(), gers);
+//                System.out.println("Final Geração: "+getPopulacao().toString());
+                if (graficosG) {
+                    Thread.sleep(500);
+                    PlotTest plot = new PlotTest(popInicial, getAntigenos(), getPopulacao(), gers);
+                }
+
             }
-            
+
             System.out.println("Geração: " + gers);
             mediaGeracoes += gers;
-            gers=0;
+            gers = 0;
             // Faz uma média das redondezas
 //            mediasInt(0.2);
 //            kMedias();
-            
-            
-            //Mostra matriz
-            Matriz matriz = new Matriz(getPopulacao(), getAntigenos());
-            //int[][] m = matriz.criaMatriz(true);
 
+            //Mostra matriz
+//            Matriz matriz = new Matriz(getPopulacao(), getAntigenos());
+            //int[][] m = matriz.criaMatriz(true);
             System.out.println("N. Anticorpos: " + getPopulacao().size());
 //            System.out.println("N. Antígenos: " + clo.getAntigenos().size());
 
-          // Grupos
+            // Grupos
 //        clo.grupos(clo.getPopulacao(),m);
-          // Gerar gráfico com objetos e protótipos
-        if(getAntigenos().get(0).getVars().size()==2){
-            PlotTest plot = new PlotTest(popInicial, getAntigenos(), getPopulacao(), it);
-        }
+            // Gerar gráfico com objetos e protótipos
+            if (getAntigenos().get(0).getVars().size() == 2) {
+                PlotTest plot = new PlotTest(popInicial, getAntigenos(), getPopulacao(), it - 1);
+            }
 //            System.out.println(popInicial.toString());
             mediaPCC += matrizGrupos();
 
@@ -594,7 +681,7 @@ public class Clonalg {
             System.out.println("");
             mediaPrototipos += getPopulacao().size();
         }
-        System.out.println("Número de Antígenos: "+getAntigenos().size());
+        System.out.println("Número de Antígenos: " + getAntigenos().size());
         System.out.println("Média PCC: " + mediaPCC / execucoes.size());
         System.out.println("Média Protótipos: " + mediaPrototipos / execucoes.size());
         System.out.println("Media Gerações: " + mediaGeracoes / execucoes.size());
