@@ -29,7 +29,10 @@ public class Leitor {
         //Rusp 2    4
         //S1   2    3
         //S2   2    2
-        String nome = "NovaRuspini.txt";
+        //Bal  4    3
+        //heart13   2
+        //liver6    2
+        String nome = "pima.txt";
         try {
             FileReader arq = new FileReader(nome);
             BufferedReader lerArq = new BufferedReader(arq);
