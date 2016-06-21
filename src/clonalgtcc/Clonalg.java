@@ -7,64 +7,43 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
-// NUNCA ATUALIZAR A POPULAÇÃO, SOMENTE OS CLONES
-// FAZER MATRIZ DE PERTINENCIA E TESTAR BASES MAIORES
 
 /**
- * ARRUMAR NORMALIZAÇÃO DE DISTÂNCIAS DA AFINIDADE. Fazer com que clones
- * melhores substituam PAIS
- *
  * @author joao
  */
 public class Clonalg {
-
+    // Utilitários
     private final Random r = new Random();
     DecimalFormat df = new DecimalFormat("#.##");
+    
+    // Variavéis Sistema
     private ArrayList<Anticorpo> populacao = new ArrayList<>();
     ArrayList<Anticorpo> tests = new ArrayList<>();
-
-//    private static final int tamAnticorpo = 15; // ordem da matriz-1
-    // Variavéis do Sistema
-    // Obter Antigenos
     Leitor leitor = new Leitor();
     QuickSort quick = new QuickSort();
     private ArrayList<Antigeno> antigenos = leitor.leAntigenos();
 
     // Configurações.
-    private static final int numExecu = 100;
-    private static double limiar = 0.0; // numero de anticorpos selecionados para serem clonados
+    private static final int numExecu = 100; // número de testes
+    private static double limiar = 0.0; // número de anticorpos selecionados para serem clonados
     private static final int numClo = 5;//6 // cada selecionado possuirá este número de clones ou menos
-    private static final double numSel = 0.5; // numero de clones selecionados para entra na população 20%.
+    private static final double numSel = 0.5; // número de clones selecionados para entra na população 50%.
     private static int numGeracoes = 200;
-    private static final double erroQuadratico = 0.001;
-    private static final int tamanhoBase = 8;
-    private static boolean graficosG = false;
-    private static boolean graficosF = false;
+    private static final double erroQuadratico = 0.001; // diferença necessária para parada
+    private static final int tamanhoBase = 13; // dimensões da base
+    private static boolean graficosG = false; // graficos de cada geração
+    private static boolean graficosF = false; // graficos para cada final de execução
+
+
 
     /**
-     * Gera uma população de anticorpos aleatrios no intervalo (0,1].
+     * Gera uma várias populações iniciais de anticorpos aleatórios no intervalo (0,1].
      *
-     * @param tamPop tamanho da população desejada.
+     * @param numExec número de execuções..
      */
-    public void geraPop2(int tamPop) {
-        for (int i = 0; i < tamPop; i++) {
-            Anticorpo ant = new Anticorpo(tamanhoBase);
-
-//            for (double var : ant.getVars()) {
-//                var = r.nextFloat();
-//            }
-            for (int v = 0; v < tamanhoBase; v++) {
-                ant.getVars().set(v, (double) r.nextFloat());
-            }
-
-            ant.setAfinidade(-1); // afinidade negativa quando iniciado.
-            populacao.add(ant);
-        }
-    }
-
-    public ArrayList<Anticorpo> geraPop(int tamPop) {
+    public ArrayList<Anticorpo> geraPop(int numExec) {
         ArrayList<Anticorpo> iniciais = new ArrayList<>();
-        for (int i = 0; i < tamPop; i++) {
+        for (int i = 0; i < numExec; i++) {
             Anticorpo ant = new Anticorpo(tamanhoBase);
 
 //            for (double var : ant.getVars()) {
@@ -126,7 +105,7 @@ public class Clonalg {
     /**
      * Para cada antigeno selecionado calcular o anticorpo de maior afinidade e
      * então setar sua afinidade e seu antigeno. Atualiza afinidade de um
-     * anticorpo. x-min/max-min (normalização)
+     * anticorpo. 
      *
      * @param anticorposs Lista de anticorpos para atualizar a afinidade.
      */
@@ -134,21 +113,13 @@ public class Clonalg {
         ArrayList<Anticorpo> anticorpos = new ArrayList<>();
         anticorpos.addAll(anticorposs);
 //        ArrayList<Anticorpo> anticorpos = (ArrayList<Anticorpo>)anticorposs.clone();
-
-//        double min = 0;
-//        double max = Math.sqrt(tamanhoBase);
-//        double min = Double.MAX_VALUE;
-//        double max = 0;
         Collections.shuffle(getAntigenos()); //Fisher–Yates shuffle @https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
 //        for (int i = 0; i < Math.min(anticorposs.size(), antigenos.size()); i++) {// for de antigenos
         for (int i = 0; i < antigenos.size(); i++) {// for de antigenos
-//            double somatorio = 0;
             Auxx aux = new Auxx(Double.MIN_VALUE); // Guarda o anticorpo de menor distância, e a menor distância.
             aux.setAnticorpo(null); // inicializa um anticorpo para o aux
             for (Anticorpo anticorpo : anticorpos) { // Encontrar o anticorpo de maior afinidade
                 double dist =  1/distanciaEuclidiana(anticorpo, antigenos.get(i));
-//                somatorio = somatorio + dist;
-//                System.out.println("Distância: "+dist);
                 //quanto maior afinidade melhor
                 if (dist > aux.getDist()) { // atualiza quem tem maior afinidade
 //                    if (dist > anticorpo.getAfinidade() && anticorpo.getAntigeno() != null) {
@@ -162,14 +133,8 @@ public class Clonalg {
 
                 }
             }
-//            if(anticorposs.size()<=5){
-//                System.out.println("sim");
-            // Impede a competitividade
-//            anticorpos.remove(aux.getAnticorpo());
-//            }
-//            else{System.out.println("não");}
+
             // atualiza afinidade
-//            double afinidade = aux.getDist() / somatorio;
             double afinidade = 0;
 //            if (anticorpos.size() > 1) {
 //                afinidade = (aux.getDist() - min) / (max - min);
@@ -530,6 +495,9 @@ public class Clonalg {
         ArrayList<String> resultados = new ArrayList<>();
         double limi=0.0;
         for(int z=0;z<9;z++){
+            ArrayList<Double> desvioPCC = new ArrayList();
+            ArrayList<Double> desvioPro = new ArrayList();
+            ArrayList<Double> desvioGer = new ArrayList();
             double mediaPCC = 0, melhorPCC=0, piorPCC=1000.0;
         double mediaGeracoes = 0;
         double mediaPrototipos = 0;
@@ -538,7 +506,9 @@ public class Clonalg {
             limi += 0.1;
             limiar = limi;
         long start = System.currentTimeMillis();
+        
         for (Anticorpo exec : execucoes) {
+            int gers = 0;
 //            System.out.println("Test " + it + ": ");
             it++;
             getPopulacao().removeAll(getPopulacao());
@@ -549,7 +519,7 @@ public class Clonalg {
 
             double objetivoAtual = 0;
             double objetivo = 0;
-            int gers = 0;
+            
             atualizaAfinidadePop(getPopulacao());
             // Laço do algoritmo, inicia as gerações
             for (int i = 0; i < numGeracoes; i++) {
@@ -664,7 +634,7 @@ public class Clonalg {
             
 
 //            System.out.println("Geração: " + gers);
-            mediaGeracoes += gers;
+            
             
             // Faz uma média das redondezas
 //            mediasInt(0.2);
@@ -683,8 +653,16 @@ public class Clonalg {
                 PlotTest plot = new PlotTest(popInicial, getAntigenos(), getPopulacao(), it - 1);
             }
 //            System.out.println(popInicial.toString());
+            //Calculos PCC
             double PCC = matrizGrupos();
+            desvioPCC.add(PCC);
             mediaPCC += PCC;
+            //Calculos Gerações
+            desvioGer.add((double)gers);
+            mediaGeracoes += gers;
+            //Calculos de protótipos
+            desvioPro.add((double)getPopulacao().size());
+            mediaPrototipos += getPopulacao().size();
             
             // Maxs e Mins
             if(melhorPCC<(PCC)){
@@ -705,21 +683,15 @@ public class Clonalg {
             if(minGer>gers){
                 minGer = gers;
             }
+
             gers = 0;
-            // Imprime a população no final da geração
-//        System.out.println(clo.getPopulacao().get(0));
-//        clo.imprimeCaminho(clo.getPopulacao().get(0));
-//            for(int h=0;h<clo.getPopulacao().size();h++){
-//                System.out.print(h+1+"º "+clo.getPopulacao().get(h).toString());
-//            }
-//            System.out.println("");
-            mediaPrototipos += getPopulacao().size();
         }
+        
         System.out.println("Limiar: "+limi);
         System.out.println("Número de Antígenos: " + getAntigenos().size());
-        System.out.println("Média PCC: " + df.format(mediaPCC / execucoes.size())+"\t Min: "+df.format(piorPCC)+"\t Máx: "+df.format(melhorPCC));
-        System.out.println("M. Protótipos: " + mediaPrototipos / execucoes.size()+"\t Min: "+minNumProt+"\t\t Máx: "+maxNumProt);
-        System.out.println("M. Gerações: " + mediaGeracoes / execucoes.size()+"\t Min: "+minGer+"\t\t Máx: "+maxGer);
+        System.out.println("Média PCC: " + df.format(mediaPCC / execucoes.size())+"±"+df.format(desvioPadrao(desvioPCC, mediaPCC/execucoes.size()))+"\t Min: "+df.format(piorPCC)+"\t Máx: "+df.format(melhorPCC));
+        System.out.println("M. Protótipos: " + mediaPrototipos / execucoes.size()+"±"+df.format(desvioPadrao(desvioPro, mediaPrototipos/execucoes.size()))+"\t Min: "+minNumProt+"\t\t Máx: "+maxNumProt);
+        System.out.println("M. Gerações: " + mediaGeracoes / execucoes.size()+"±"+df.format(desvioPadrao(desvioGer, mediaGeracoes/execucoes.size()))+"\t Min: "+minGer+"\t\t Máx: "+maxGer);
         
         // Pra excel
         System.out.println("");
@@ -729,8 +701,10 @@ public class Clonalg {
 //        System.out.println("");
 //        String sb = "Limiar: "+limi+"\n"+df.format(piorPCC)+"\t"+df.format(mediaPCC / execucoes.size())+"\t"+df.format(melhorPCC)+"\t"+minNumProt +"\t"+ df.format(mediaPrototipos / execucoes.size())+"\t"+maxNumProt+"\t"+minGer+"\t"+ df.format(mediaGeracoes / execucoes.size())+"\t"+maxGer+"\n";
         long finish = System.currentTimeMillis();
-        double time = (finish - start)/1000;
-        String sb = df.format(piorPCC)+"\t"+df.format(mediaPCC / execucoes.size())+"\t"+df.format(melhorPCC)+"\t"+minNumProt +"\t"+ df.format(mediaPrototipos / execucoes.size())+"\t"+maxNumProt+"\t"+minGer+"\t"+ df.format(mediaGeracoes / execucoes.size())+"\t"+maxGer+"\t"+df.format(time)+"\n";
+        double time = (finish - start);
+        String sb = df.format(piorPCC)+"\t"+df.format(mediaPCC / execucoes.size())+"±"+df.format(desvioPadrao(desvioPCC, mediaPCC/execucoes.size()))+"\t"+df.format(melhorPCC)+"\t"+
+                minNumProt +"\t"+ df.format(mediaPrototipos / execucoes.size())+"±"+df.format(desvioPadrao(desvioPro, mediaPrototipos/execucoes.size()))+"\t"+maxNumProt+"\t"+
+                minGer+"\t"+ df.format(mediaGeracoes / execucoes.size())+"±"+df.format(desvioPadrao(desvioGer, mediaGeracoes/execucoes.size()))+"\t"+maxGer+"\t"+df.format(time)+"\n";
         resultados.add(sb);
     }
         
@@ -744,7 +718,16 @@ public class Clonalg {
 //        System.out.println(mediaPCC / execucoes.size()+" "+ mediaPrototipos / execucoes.size()+" "+mediaGeracoes / execucoes.size());
 
     }
-
+    
+    //@link{http://www.guj.com.br/t/desvio-padrao/38312/2}
+    private double desvioPadrao(ArrayList<Double> desvio, double media) {
+        int somatorio=0;
+        for (Double desv : desvio) {
+            somatorio+= Math.pow((desv - media), 2);
+        }
+        double desvioPadrao = Math.sqrt((double)((double)1/((double)desvio.size()-1))*somatorio);
+        return desvioPadrao;
+    }
     /**
      * @return the antigenos
      */
@@ -779,5 +762,7 @@ public class Clonalg {
     public void setNumGeracoes(int numGeracoes) {
         this.numGeracoes = numGeracoes;
     }
+
+
 
 }
