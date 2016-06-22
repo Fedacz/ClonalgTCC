@@ -59,8 +59,8 @@ public class Auxx {
     }
     
     public static void main(String[] args) {
-//        Random r = new Random();
-//        DecimalFormat df = new DecimalFormat("#.####");
+        Random r = new Random();
+        DecimalFormat df = new DecimalFormat("#.####");
 //        ArrayList<Integer> nums = new ArrayList<>();
 //        ArrayList<Integer> nums2 = new ArrayList<>();
 //        for(int i =0;i<10;i++){
@@ -69,24 +69,43 @@ public class Auxx {
 //            }
 //            System.out.println("");
 //        }
-    ArrayList<Integer> l1 = new ArrayList<>();
-    ArrayList<Integer> l2 = new ArrayList<>();
-
-    l1.add(1);
-    l1.add(2);
-    l1.add(3);
-    l2.addAll(l1);
-    
-    l2.remove(0);
-    
-        for (Integer integer : l1) {
-            System.out.println(integer);
+//***********************************************************
+//    ArrayList<Integer> l1 = new ArrayList<>();
+//    ArrayList<Integer> l2 = new ArrayList<>();
+//
+//    l1.add(1);
+//    l1.add(2);
+//    l1.add(3);
+//    l2.addAll(l1);
+//    
+//    l2.remove(0);
+//    
+//        for (Integer integer : l1) {
+//            System.out.println(integer);
+//        }
+//        System.out.println("");
+//        for (Integer integer : l2) {
+//            System.out.println(integer);
+//        }
+    ArrayList<Double> valores = new ArrayList<>();
+    int sum = 0;
+        System.out.println("Valores: ");
+        for (int i = 0; i < 15; i++) {
+            valores.add((double)r.nextInt(30));
+            sum+= valores.get(i);
+            System.out.print(valores.get(i)+", ");
         }
         System.out.println("");
-        for (Integer integer : l2) {
-            System.out.println(integer);
-        }
         
+        double media = sum/valores.size();
+        Clonalg clo = new Clonalg();
+        
+        System.out.println("Média: "+media+" Desvio: "+df.format(clo.desvioPadrao(valores, media)));
+        
+        
+        
+
+
     }
 
 }

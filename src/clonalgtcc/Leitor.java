@@ -32,7 +32,7 @@ public class Leitor {
         //Bal  4    3
         //heart13   2
         //liver6    2
-        String nome = "wine.txt";
+        String nome = "pima.txt";
         try {
             FileReader arq = new FileReader(nome);
             BufferedReader lerArq = new BufferedReader(arq);

@@ -30,7 +30,7 @@ public class Clonalg {
     private static final double numSel = 0.5; // número de clones selecionados para entra na população 50%.
     private static int numGeracoes = 200;
     private static final double erroQuadratico = 0.001; // diferença necessária para parada
-    private static final int tamanhoBase = 13; // dimensões da base
+    private static final int tamanhoBase = 8; // dimensões da base
     private static boolean graficosG = false; // graficos de cada geração
     private static boolean graficosF = false; // graficos para cada final de execução
 
@@ -122,30 +122,25 @@ public class Clonalg {
                 double dist =  1/distanciaEuclidiana(anticorpo, antigenos.get(i));
                 //quanto maior afinidade melhor
                 if (dist > aux.getDist()) { // atualiza quem tem maior afinidade
-//                    if (dist > anticorpo.getAfinidade() && anticorpo.getAntigeno() != null) {
-//                        aux.setDist(dist);
-//                        aux.setAnticorpo(anticorpo);
-//                    }
-//                    if (anticorpo.getAntigeno() == null) {
+                    if (dist > anticorpo.getAfinidade() && anticorpo.getAntigeno() != null) {
                         aux.setDist(dist);
                         aux.setAnticorpo(anticorpo);
-//                    }
+                    }
+                    if (anticorpo.getAntigeno() == null) {
+                        aux.setDist(dist);
+                        aux.setAnticorpo(anticorpo);
+                    }
 
                 }
             }
 
             // atualiza afinidade
             double afinidade = 0;
-//            if (anticorpos.size() > 1) {
-//                afinidade = (aux.getDist() - min) / (max - min);
-//            } else {
-//                afinidade = 0.0;
-//            }
-//            if (aux.getAnticorpo() != null) {
+            if (aux.getAnticorpo() != null) {
                 afinidade = aux.getDist();
                 aux.getAnticorpo().setAfinidade(afinidade);
                 aux.getAnticorpo().setAntigeno(antigenos.get(i));
-//            }
+            }
 //            System.out.println("Distância: "+aux.getDist()+" Soma: "+somatorio);
 //            System.out.println("Afinidade: "+afinidade);
 //            System.out.println("Somatorio: "+somatorio);
@@ -175,7 +170,7 @@ public class Clonalg {
         for (Anticorpo anticorpo : anticorposs) {
             if (anticorposs.size() == 1) {
 //                System.out.println("caiu: "+anticorpo.toString());
-                anticorpo.setAfinidade(1); // único entao 0
+                anticorpo.setAfinidade(0.3); // único entao 0
             } else if (anticorpo.getAfinidade() == -1) {
                 anticorpo.setAfinidade((anticorpo.getAfinidade())); // -1 continua -1
             } else {
@@ -534,8 +529,8 @@ public class Clonalg {
                     ArrayList<Anticorpo> selecionados = new ArrayList<>();
                     // é selecionado os anticorpos que possuem afinidade < limiar
                     for (Anticorpo anticorpo : getPopulacao()) {
-//                        if ((anticorpo.getAfinidade() > limiar || i == 0) && anticorpo.getAfinidade() != -1) { // limiar
-                        if ((anticorpo.getAfinidade() > limiar) && anticorpo.getAfinidade() != -1) { // limiar
+                        if ((anticorpo.getAfinidade() > limiar || i == 0) && anticorpo.getAfinidade() != -1) { // limiar
+//                        if ((anticorpo.getAfinidade() > limiar) && anticorpo.getAfinidade() != -1 ) { // limiar
                             int nClones = (int) (numClo * (anticorpo.getAfinidade())); // modificado 1- anti
                             if (nClones < 1) {
                                 nClones = 1;
@@ -720,7 +715,7 @@ public class Clonalg {
     }
     
     //@link{http://www.guj.com.br/t/desvio-padrao/38312/2}
-    private double desvioPadrao(ArrayList<Double> desvio, double media) {
+    public double desvioPadrao(ArrayList<Double> desvio, double media) {
         int somatorio=0;
         for (Double desv : desvio) {
             somatorio+= Math.pow((desv - media), 2);
