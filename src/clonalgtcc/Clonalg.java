@@ -24,18 +24,63 @@ public class Clonalg {
     private ArrayList<Antigeno> antigenos = leitor.leAntigenos();
 
     // Configurações.
-    private static final int numExecu = 100; // número de testes
-    private static double limiar = 0.4; // número de anticorpos selecionados para serem clonados
+    private static final int numExecu = 1000; // número de testes
+    private static double limiar = 0.6; // número de anticorpos selecionados para serem clonados
     private static final int numClo = 5;//6 // cada selecionado possuirá este número de clones ou menos
     private static final double numSel = 0.5; // número de clones selecionados para entra na população 50%.
     private static int numGeracoes = 200;
     private static final double erroQuadratico = 0.001; // diferença necessária para parada
-    private static final int tamanhoBase = 2; // dimensões da base
+    private static final int tamanhoBase = 4; // dimensões da base
     private static boolean graficosG = false; // graficos de cada geração
     private static boolean graficosF = false; // graficos para cada final de execução
 
 
-
+    public double erroQuadratico(){
+        double aux = 0;
+        for (Antigeno antigeno : getAntigenos()) {         
+                        for (Anticorpo anticorpo : getPopulacao()) {
+                            if (anticorpo.getAntigeno() == antigeno) {
+//                                objetivoAtual = objetivoAtual + (1 * Math.pow(anticorpo.getAfinidade(), 2));
+                                aux = aux + (1 * Math.pow(distanciaEuclidiana(anticorpo, antigeno), 2));
+                            } else {
+//                                objetivoAtual = objetivoAtual + (0 * Math.pow(anticorpo.getAfinidade(), 2));
+                                aux = aux + (0 * Math.pow(distanciaEuclidiana(anticorpo, antigeno), 2));
+                            }
+                        }
+                    }
+        return aux;
+        }
+    public double xieBeni(){
+        double aux = 0;
+        double aux2 = 0;
+        double menorDistancia = 1000;
+        double distanciaAtual;
+        for (Antigeno antigeno : getAntigenos()) {         
+                        for (Anticorpo anticorpo : getPopulacao()) {
+                            if (anticorpo.getAntigeno() == antigeno) {
+//                                objetivoAtual = objetivoAtual + (1 * Math.pow(anticorpo.getAfinidade(), 2));
+                                aux = aux + (1 * Math.pow(distanciaEuclidiana(anticorpo, antigeno), 2));
+                            } else {
+//                                objetivoAtual = objetivoAtual + (0 * Math.pow(anticorpo.getAfinidade(), 2));
+                                aux = aux + (0 * Math.pow(distanciaEuclidiana(anticorpo, antigeno), 2));
+                            }
+                        }
+                    }
+        for (Anticorpo anticorpo : populacao) {
+            for (Anticorpo anticorpo1 : populacao) {
+                if (anticorpo != anticorpo1){
+                    distanciaAtual = distanciaEuclidianaAnticorpos(anticorpo, anticorpo1);
+                    if(distanciaAtual < menorDistancia){
+                        menorDistancia = distanciaAtual;
+                    }
+                }
+            }        
+        }
+        aux2 = antigenos.size()*menorDistancia;
+        return aux/aux2;
+        }
+    
+    
     /**
      * Gera uma várias populações iniciais de anticorpos aleatórios no intervalo (0,1].
      *
@@ -101,6 +146,15 @@ public class Clonalg {
 
         return Math.sqrt(soma);
     }
+    public double distanciaEuclidianaAnticorpos(Anticorpo anticorpo, Anticorpo anticorpo1) {
+        double soma = 0;
+
+        for (int v = 0; v < tamanhoBase; v++) {
+            soma += Math.pow((anticorpo1.getVars().get(v) - anticorpo.getVars().get(v)), 2);
+        }
+
+        return Math.sqrt(soma);
+    }
 
     /**
      * Para cada antigeno selecionado calcular o anticorpo de maior afinidade e
@@ -156,7 +210,7 @@ public class Clonalg {
 //         Setanto afinidades normalizadas
         for (Anticorpo anticorpo : anticorposs) {
             if (anticorposs.size() == 1) {
-                anticorpo.setAfinidade(.3); // único entao 0
+                anticorpo.setAfinidade(0); // único entao 0
             } else if (anticorpo.getAfinidade() == -1) {
                 anticorpo.setAfinidade((anticorpo.getAfinidade())); // -1 continua -1
             } else {
@@ -472,10 +526,12 @@ public class Clonalg {
         
         ArrayList<String> resultados = new ArrayList<>();
         
-            ArrayList<Double> desvioPCC = new ArrayList();
-            ArrayList<Double> desvioPro = new ArrayList();
-            ArrayList<Double> desvioGer = new ArrayList();
-            double mediaPCC = 0, melhorPCC=0, piorPCC=1000.0;
+        ArrayList<Double> desvioPCC = new ArrayList();
+        ArrayList<Double> desvioPro = new ArrayList();
+        ArrayList<Double> desvioGer = new ArrayList();
+        ArrayList<Double> desvioErro = new ArrayList();
+        double mediaPCC = 0, melhorPCC=0, piorPCC=1000.0;
+        double mediaErro = 0;
         double mediaGeracoes = 0;
         double mediaPrototipos = 0;
         int maxNumProt = 0, minNumProt = Integer.MAX_VALUE, maxGer = 0, minGer = Integer.MAX_VALUE;
@@ -493,9 +549,10 @@ public class Clonalg {
             Anticorpo inicial = new Anticorpo((ArrayList<Double>) getPopulacao().get(0).getVars().clone());
             popInicial.add(inicial);
 
-            double objetivoAtual = 0;
+            double objetivoAtual =0;
+            double objetivoAnterior = 0;
             double objetivo = 0;
-            
+           
             atualizaAfinidadePop(getPopulacao());
             // Laço do algoritmo, inicia as gerações
             for (int i = 0; i < numGeracoes; i++) {
@@ -551,7 +608,7 @@ public class Clonalg {
 //            System.out.println(clo.getPopulacao().toString());
                     // 9) Calcular o erro quadrático.
                     // Calcula função objetivo (Erro Quadrático)
-                    kMedias();
+                   kMedias();
                     // Atualiza a afinidade da população (Reseta afinidades)
                     for (Anticorpo anticorpo : getPopulacao()) {
                         anticorpo.setAntigeno(null);
@@ -570,32 +627,16 @@ public class Clonalg {
                     getPopulacao().removeAll(deletss);
 
                     // Função objetivo
-                    objetivoAtual = 0;
-                    for (Antigeno antigeno : getAntigenos()) {
-                        for (Anticorpo anticorpo : getPopulacao()) {
-                            if (anticorpo.getAntigeno() == antigeno) {
-//                                objetivoAtual = objetivoAtual + (1 * Math.pow(anticorpo.getAfinidade(), 2));
-                                objetivoAtual = objetivoAtual + (1 * Math.pow(distanciaEuclidiana(anticorpo, antigeno), 2));
-                            } else {
-//                                objetivoAtual = objetivoAtual + (0 * Math.pow(anticorpo.getAfinidade(), 2));
-                                objetivoAtual = objetivoAtual + (0 * Math.pow(distanciaEuclidiana(anticorpo, antigeno), 2));
-                            }
-                        }
-                    }
-                    objetivo = Math.abs(objetivo - objetivoAtual);
-                    //************************************
-//                    if(getPopulacao().size() > 2){
-//                        kMedias();
-//                    }
-//                    atualizaAfinidadePop(getPopulacao());   //*
-//                System.out.println("Objetivo: " + objetivo);
+                    //mudar caso precise alterar a fo
+                    objetivoAtual = erroQuadratico();  
+                    
+                    objetivo = Math.abs(objetivoAnterior - objetivoAtual);
+                   
+                    objetivoAnterior = objetivoAtual;
+                   
+                   
                     gers = i + 1;
-                    // K-MÉDIAS ao final de cada geração.
-//                if(i >= 2){
-                    //10) k-Médias na população geral.
-//                    kMedias();
-//////                    atualizaAfinidadePop(getPopulacao());   //*  
-//                }
+
                 } else {
                     gers = i + 1;
                     i = numGeracoes; // finaliza o alg.
@@ -639,6 +680,10 @@ public class Clonalg {
             //Calculos de protótipos
             desvioPro.add((double)getPopulacao().size());
             mediaPrototipos += getPopulacao().size();
+            //Calculo erros
+            desvioErro.add(objetivoAtual);
+            mediaErro += objetivoAtual;
+            
             
             // Maxs e Mins
             if(melhorPCC<(PCC)){
@@ -668,6 +713,7 @@ public class Clonalg {
         System.out.println("Média PCC: " + df.format(mediaPCC / execucoes.size())+"±"+df.format(desvioPadrao(desvioPCC, mediaPCC/execucoes.size()))+"\t Min: "+df.format(piorPCC)+"\t Máx: "+df.format(melhorPCC));
         System.out.println("M. Protótipos: " + mediaPrototipos / execucoes.size()+"±"+df.format(desvioPadrao(desvioPro, mediaPrototipos/execucoes.size()))+"\t Min: "+minNumProt+"\t\t Máx: "+maxNumProt);
         System.out.println("M. Gerações: " + mediaGeracoes / execucoes.size()+"±"+df.format(desvioPadrao(desvioGer, mediaGeracoes/execucoes.size()))+"\t Min: "+minGer+"\t\t Máx: "+maxGer);
+        System.out.println("M. Erro: " + mediaErro / execucoes.size()+"±"+(desvioPadrao(desvioErro, mediaErro/execucoes.size())));
         
         // Pra excel
         System.out.println("");
@@ -697,7 +743,7 @@ public class Clonalg {
     
     //@link{http://www.guj.com.br/t/desvio-padrao/38312/2}
     public double desvioPadrao(ArrayList<Double> desvio, double media) {
-        int somatorio=0;
+        double somatorio=0;
         for (Double desv : desvio) {
             somatorio+= Math.pow((desv - media), 2);
         }
