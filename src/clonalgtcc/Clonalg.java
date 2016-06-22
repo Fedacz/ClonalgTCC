@@ -30,7 +30,7 @@ public class Clonalg {
     private static final double numSel = 0.5; // número de clones selecionados para entra na população 50%.
     private static int numGeracoes = 200;
     private static final double erroQuadratico = 0.001; // diferença necessária para parada
-    private static final int tamanhoBase = 8; // dimensões da base
+    private static final int tamanhoBase = 4; // dimensões da base
     private static boolean graficosG = false; // graficos de cada geração
     private static boolean graficosF = false; // graficos para cada final de execução
 
