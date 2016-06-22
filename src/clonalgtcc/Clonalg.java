@@ -25,12 +25,12 @@ public class Clonalg {
 
     // Configurações.
     private static final int numExecu = 100; // número de testes
-    private static double limiar = 0.0; // número de anticorpos selecionados para serem clonados
+    private static double limiar = 0.4; // número de anticorpos selecionados para serem clonados
     private static final int numClo = 5;//6 // cada selecionado possuirá este número de clones ou menos
     private static final double numSel = 0.5; // número de clones selecionados para entra na população 50%.
     private static int numGeracoes = 200;
     private static final double erroQuadratico = 0.001; // diferença necessária para parada
-    private static final int tamanhoBase = 4; // dimensões da base
+    private static final int tamanhoBase = 2; // dimensões da base
     private static boolean graficosG = false; // graficos de cada geração
     private static boolean graficosF = false; // graficos para cada final de execução
 
@@ -141,45 +141,28 @@ public class Clonalg {
                 aux.getAnticorpo().setAfinidade(afinidade);
                 aux.getAnticorpo().setAntigeno(antigenos.get(i));
             }
-//            System.out.println("Distância: "+aux.getDist()+" Soma: "+somatorio);
-//            System.out.println("Afinidade: "+afinidade);
-//            System.out.println("Somatorio: "+somatorio);
-//            System.out.println("Distância: "+aux.getDist());
-//            System.out.println("Afinidade: "+afinidade);
-
         }
         // Depois que calcula todas afinidades, normalizar todas as diferentes de -1
         //Pegando máximo e mínimo
         double somatorio = 0;
-//        System.out.println("Afinidades não normalizadas: ");
+
         for (Anticorpo anticorpo : anticorposs) {
             if (anticorpo.getAfinidade() != -1) {
-//                System.out.println("Afinidade: "+anticorpo.getAfinidade());
+
                 somatorio += anticorpo.getAfinidade();
             }
-//            if (anticorpo.getAfinidade() < min && anticorpo.getAfinidade() != -1) {
-//                min = anticorpo.getAfinidade();
-//            }
-//            if (anticorpo.getAfinidade() > max) {
-//                max = anticorpo.getAfinidade();
-//            }
+
         }
-//        System.out.println("Afinidades Antigas: ");
-//        System.out.println(anticorposs.toString());
 //         Setanto afinidades normalizadas
         for (Anticorpo anticorpo : anticorposs) {
             if (anticorposs.size() == 1) {
-//                System.out.println("caiu: "+anticorpo.toString());
-                anticorpo.setAfinidade(0.3); // único entao 0
+                anticorpo.setAfinidade(.3); // único entao 0
             } else if (anticorpo.getAfinidade() == -1) {
                 anticorpo.setAfinidade((anticorpo.getAfinidade())); // -1 continua -1
             } else {
                 anticorpo.setAfinidade((anticorpo.getAfinidade()) / (somatorio));
             }
         }
-//        System.out.println("Max: "+max+" Min: "+min);
-//        System.out.println("Afinidades Normalizadas: ");
-//        System.out.println(anticorposs.toString());
     }
 
     /**
@@ -488,8 +471,7 @@ public class Clonalg {
         
         
         ArrayList<String> resultados = new ArrayList<>();
-        double limi=0.0;
-        for(int z=0;z<9;z++){
+        
             ArrayList<Double> desvioPCC = new ArrayList();
             ArrayList<Double> desvioPro = new ArrayList();
             ArrayList<Double> desvioGer = new ArrayList();
@@ -498,8 +480,7 @@ public class Clonalg {
         double mediaPrototipos = 0;
         int maxNumProt = 0, minNumProt = Integer.MAX_VALUE, maxGer = 0, minGer = Integer.MAX_VALUE;
             int it = 1;
-            limi += 0.1;
-            limiar = limi;
+           
         long start = System.currentTimeMillis();
         
         for (Anticorpo exec : execucoes) {
@@ -682,7 +663,7 @@ public class Clonalg {
             gers = 0;
         }
         
-        System.out.println("Limiar: "+limi);
+        System.out.println("Limiar: "+limiar);
         System.out.println("Número de Antígenos: " + getAntigenos().size());
         System.out.println("Média PCC: " + df.format(mediaPCC / execucoes.size())+"±"+df.format(desvioPadrao(desvioPCC, mediaPCC/execucoes.size()))+"\t Min: "+df.format(piorPCC)+"\t Máx: "+df.format(melhorPCC));
         System.out.println("M. Protótipos: " + mediaPrototipos / execucoes.size()+"±"+df.format(desvioPadrao(desvioPro, mediaPrototipos/execucoes.size()))+"\t Min: "+minNumProt+"\t\t Máx: "+maxNumProt);
@@ -701,7 +682,7 @@ public class Clonalg {
                 minNumProt +"\t"+ df.format(mediaPrototipos / execucoes.size())+"±"+df.format(desvioPadrao(desvioPro, mediaPrototipos/execucoes.size()))+"\t"+maxNumProt+"\t"+
                 minGer+"\t"+ df.format(mediaGeracoes / execucoes.size())+"±"+df.format(desvioPadrao(desvioGer, mediaGeracoes/execucoes.size()))+"\t"+maxGer+"\t"+df.format(time)+"\n";
         resultados.add(sb);
-    }
+    
         
         System.out.println("Resutados: ");
         for (String resultado : resultados) {
