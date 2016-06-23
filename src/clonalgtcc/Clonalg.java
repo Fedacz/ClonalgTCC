@@ -15,6 +15,7 @@ public class Clonalg {
     // Utilitários
     private final Random r = new Random();
     DecimalFormat df = new DecimalFormat("#.##");
+    DecimalFormat dferro = new DecimalFormat("#.######");
     
     // Variavéis Sistema
     private ArrayList<Anticorpo> populacao = new ArrayList<>();
@@ -24,13 +25,13 @@ public class Clonalg {
     private ArrayList<Antigeno> antigenos = leitor.leAntigenos();
 
     // Configurações.
-    private static final int numExecu = 1000; // número de testes
+    private static final int numExecu = 100; // número de testes
     private static double limiar = 0.6; // número de anticorpos selecionados para serem clonados
     private static final int numClo = 5;//6 // cada selecionado possuirá este número de clones ou menos
     private static final double numSel = 0.5; // número de clones selecionados para entra na população 50%.
     private static int numGeracoes = 200;
     private static final double erroQuadratico = 0.001; // diferença necessária para parada
-    private static final int tamanhoBase = 4; // dimensões da base
+    private static final int tamanhoBase = 6; // dimensões da base
     private static boolean graficosG = false; // graficos de cada geração
     private static boolean graficosF = false; // graficos para cada final de execução
 
@@ -50,6 +51,7 @@ public class Clonalg {
                     }
         return aux;
         }
+    
     public double xieBeni(){
         double aux = 0;
         double aux2 = 0;
@@ -80,6 +82,32 @@ public class Clonalg {
         return aux/aux2;
         }
     
+    
+    public double silhuetaSimplificada(){
+       double a = 0;
+       double b = Math.sqrt(tamanhoBase);
+       double aux =0;
+       double s =0;
+       for (Antigeno antigeno : antigenos) {
+                    for (Anticorpo anticorpo : populacao) {
+                        if(antigeno == anticorpo.getAntigeno()){
+                            a = distanciaEuclidiana(anticorpo, antigeno);
+                        }
+                        else{
+                            aux = distanciaEuclidiana(anticorpo, antigeno);
+                            if(b> aux){
+                                b=aux;
+                            }                        
+                        }    
+                     }                 
+                    if (b>a){
+                        aux = (b-a)/(b);}
+                    else{
+                        aux = (b-a)/(a);}                  
+                    s += aux;
+        }
+         return s/antigenos.size() ;
+    }
     
     /**
      * Gera uma várias populações iniciais de anticorpos aleatórios no intervalo (0,1].
@@ -210,7 +238,7 @@ public class Clonalg {
 //         Setanto afinidades normalizadas
         for (Anticorpo anticorpo : anticorposs) {
             if (anticorposs.size() == 1) {
-                anticorpo.setAfinidade(0); // único entao 0
+                anticorpo.setAfinidade(.5); // único entao 0
             } else if (anticorpo.getAfinidade() == -1) {
                 anticorpo.setAfinidade((anticorpo.getAfinidade())); // -1 continua -1
             } else {
@@ -628,7 +656,7 @@ public class Clonalg {
 
                     // Função objetivo
                     //mudar caso precise alterar a fo
-                    objetivoAtual = erroQuadratico();  
+                    objetivoAtual = silhuetaSimplificada();  
                     
                     objetivo = Math.abs(objetivoAnterior - objetivoAtual);
                    
@@ -713,7 +741,7 @@ public class Clonalg {
         System.out.println("Média PCC: " + df.format(mediaPCC / execucoes.size())+"±"+df.format(desvioPadrao(desvioPCC, mediaPCC/execucoes.size()))+"\t Min: "+df.format(piorPCC)+"\t Máx: "+df.format(melhorPCC));
         System.out.println("M. Protótipos: " + mediaPrototipos / execucoes.size()+"±"+df.format(desvioPadrao(desvioPro, mediaPrototipos/execucoes.size()))+"\t Min: "+minNumProt+"\t\t Máx: "+maxNumProt);
         System.out.println("M. Gerações: " + mediaGeracoes / execucoes.size()+"±"+df.format(desvioPadrao(desvioGer, mediaGeracoes/execucoes.size()))+"\t Min: "+minGer+"\t\t Máx: "+maxGer);
-        System.out.println("M. Erro: " + mediaErro / execucoes.size()+"±"+(desvioPadrao(desvioErro, mediaErro/execucoes.size())));
+        System.out.println("M. Erro: " + mediaErro / execucoes.size()+"±"+df.format(desvioPadrao(desvioErro, mediaErro/execucoes.size())));
         
         // Pra excel
         System.out.println("");
@@ -726,7 +754,8 @@ public class Clonalg {
         double time = (finish - start);
         String sb = df.format(piorPCC)+"\t"+df.format(mediaPCC / execucoes.size())+"±"+df.format(desvioPadrao(desvioPCC, mediaPCC/execucoes.size()))+"\t"+df.format(melhorPCC)+"\t"+
                 minNumProt +"\t"+ df.format(mediaPrototipos / execucoes.size())+"±"+df.format(desvioPadrao(desvioPro, mediaPrototipos/execucoes.size()))+"\t"+maxNumProt+"\t"+
-                minGer+"\t"+ df.format(mediaGeracoes / execucoes.size())+"±"+df.format(desvioPadrao(desvioGer, mediaGeracoes/execucoes.size()))+"\t"+maxGer+"\t"+df.format(time)+"\n";
+                minGer+"\t"+ df.format(mediaGeracoes / execucoes.size())+"±"+df.format(desvioPadrao(desvioGer, mediaGeracoes/execucoes.size()))+"\t"+maxGer+"\t"+ 
+                dferro.format(mediaErro / execucoes.size())+"±"+dferro.format(desvioPadrao(desvioErro, mediaErro/execucoes.size())) + "\t"+df.format(time/1000)+"\n" ;
         resultados.add(sb);
     
         
